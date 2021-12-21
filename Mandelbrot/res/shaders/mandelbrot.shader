@@ -23,17 +23,17 @@ uniform float u_Iterations;
 void main()
 {
 	float iter = DivergenceTest();
-	color = vec4(iter/u_Iterations,0,0,1);
+	color = vec4(1-(iter/u_Iterations),0,0,1);
 }
 
 float DivergenceTest()
 {
 	vec2 c = vec2(u_Offset.x + (gl_FragCoord.x * u_FragDelta), u_Offset.y + (gl_FragCoord.y * u_FragDelta));
 	vec2 z = c;
-	float i = 0;
-	while ( i < u_Iterations && dot(z,z)<4)
+	float i = 0.0;
+	while ( i < u_Iterations && dot(z,z)<4.0)
 	{
-		z = vec2((z.x * z.x) - (z.y * z.y), 2 * z.x * z.y);
+		z = vec2((z.x * z.x) - (z.y * z.y) + c.x, 2.0 * z.x * z.y + c.y);
 		i++;
 	}
 	return i;

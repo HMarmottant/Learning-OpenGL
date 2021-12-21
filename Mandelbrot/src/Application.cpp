@@ -14,6 +14,7 @@
 #include "IndexBuffer.h"
 #include "VertexArray.h"
 #include "Shader.h"
+#include "Window.h"
 
 #pragma region glDebugMessageCallback
 // This is free and unencumbered software released into the public domain.
@@ -140,31 +141,18 @@ void APIENTRY GLDebugMessageCallback(GLenum source, GLenum type, GLuint id,
 }
 #pragma endregion
 
+double scroll = 1;
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+	if(yoffset > 0 || scroll > 1) scroll += yoffset;
+}
+
+
 int main(void)
 {
-	GLFWwindow* window;
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	/* Initialize the library */
-	if (!glfwInit())
-		return -1;
-
-	/* Create a windowed mode window and its OpenGL context */
-	window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
-	if (!window)
-	{
-		glfwTerminate();
-		return -1;
-	}
-
-	/* Make the window's context current */
-	glfwMakeContextCurrent(window);
-	glfwSwapInterval(1);
-
-	/* Fetch the necessary driver calls, needs a valid OpenGL context */
-	if (glewInit() != GLEW_OK) std::cout << "Error glewInit" << std::endl;
-
+	Window window = Window::Window("Mandelbrot",640,480,true);
+	glfwSetScrollCallback(window.m_Window, scroll_callback);
 	std::cout << glGetString(GL_VERSION) << std::endl;
 	int nrAttributes;
 	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
@@ -217,9 +205,13 @@ int main(void)
 		Shader shader("./res/shaders/mandelbrot.shader");
 		shader.Bind();
 
-		shader.SetUniform2f("u_Offset", -2.0f, -1.5f);
-		shader.SetUniform1f("u_FragDelta", 3.0f/480.0f);
-		shader.SetUniform1f("u_Iterations", 50.0f);
+		float u_Offset[] = { -2.0f, -1.5f };
+		float u_FragDelta = 2.0f / 480.0f;
+		float u_Iterations = 50.0f;
+
+		shader.SetUniform2f("u_Offset", u_Offset);
+		shader.SetUniform1f("u_FragDelta", u_FragDelta);
+		shader.SetUniform1f("u_Iterations", u_Iterations);
 
 		va.Unbind();
 		vb.Unbind();
@@ -228,30 +220,43 @@ int main(void)
 
 		Renderer renderer;
 
+
 		/* Loop until the user closes the window */
-		while (!glfwWindowShouldClose(window))
+		while (!glfwWindowShouldClose(window.m_Window))
 		{
+
+			
+
 			/* Render here */
 			renderer.Clear();
 
 			shader.Bind();
 
-			
+			shader.SetUniform2f("u_Offset", u_Offset);
+			shader.SetUniform1f("u_FragDelta", u_FragDelta);
+			shader.SetUniform1f("u_Iterations", u_Iterations);
 
 			/*va.Bind();
 			vb.Bind();
 			ib.Bind();*/
 
 			renderer.Draw(va, ib, shader);
-			//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+			
 
-			/* Swap front and back buffers */
-			glfwSwapBuffers(window);
+			window.Update();
 
-			/* Poll for and process events */
-			glfwPollEvents();
+			u_FragDelta = (2.0f / 480.0f) * pow(0.9,scroll); 
+			std::cout << u_FragDelta << std::endl;
+
+			double screenDrag[2] = {0,0};
+			window.GetMouseScreenDrag(screenDrag);
+			u_Offset[0] += screenDrag[0] * u_FragDelta;
+			u_Offset[1] += screenDrag[1] * u_FragDelta;
+
+			
 		}
 	}
 	glfwTerminate();
 	return 0;
 }
+
