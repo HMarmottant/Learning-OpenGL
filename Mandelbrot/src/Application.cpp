@@ -168,7 +168,7 @@ int main(void)
 	std::cout << glGetString(GL_VERSION) << std::endl;
 	int nrAttributes;
 	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
-	std::cout << "Maximum nr of vertex attributes supported: " << nrAttributes << std::endl;
+	std::cout << "Maximum nb of vertex attributes supported: " << nrAttributes << std::endl;
 
 	{
 #pragma region INIT DEBUG OUTPUT
@@ -214,11 +214,12 @@ int main(void)
 
 		IndexBuffer ib(indices, 6);
 
-		Shader shader("./res/shaders/basic.shader");
+		Shader shader("./res/shaders/mandelbrot.shader");
 		shader.Bind();
 
-		clock_t timer = clock();
-		shader.SetUniform4f("u_Color", timer / CLOCKS_PER_SEC, 1 - (timer / CLOCKS_PER_SEC), 0, 1);
+		shader.SetUniform2f("u_Offset", -2.0f, -1.5f);
+		shader.SetUniform1f("u_FragDelta", 3.0f/480.0f);
+		shader.SetUniform1f("u_Iterations", 50.0f);
 
 		va.Unbind();
 		vb.Unbind();
@@ -235,8 +236,7 @@ int main(void)
 
 			shader.Bind();
 
-			timer = clock();
-			shader.SetUniform4f("u_Color", (double)(timer % CLOCKS_PER_SEC) / (double)CLOCKS_PER_SEC, 1.0 - ((double)(timer % CLOCKS_PER_SEC) / (double)CLOCKS_PER_SEC), 0.0, 1.0);
+			
 
 			/*va.Bind();
 			vb.Bind();

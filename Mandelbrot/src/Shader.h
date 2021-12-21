@@ -20,7 +20,13 @@ public:
 	void Unbind() const;
 
 	void SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3);
+	void SetUniform3f(const std::string& name, float v0, float v1, float v2);
+	void SetUniform2f(const std::string& name, float v0, float v1);
 	void SetUniform1f(const std::string& name, float v0);
+	void SetUniform4ui(const std::string& name, unsigned int v0, unsigned int v1, unsigned int v2, unsigned int v3);
+	void SetUniform3ui(const std::string& name, unsigned int v0, unsigned int v1, unsigned int v2);
+	void SetUniform2ui(const std::string& name, unsigned int v0, unsigned int v1);
+	void SetUniform1ui(const std::string& name, unsigned int v0);
 private:
 	unsigned int m_RendererID;
 	std::string m_FilePath;

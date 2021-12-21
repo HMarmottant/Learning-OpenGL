@@ -5,6 +5,8 @@ VisualStudioVersion = 17.0.31919.166
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenGL", "OpenGL\OpenGL.vcxproj", "{BC6813B0-BEC0-42A1-B5DF-8A34AAA0B0E9}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Mandelbrot", "Mandelbrot\Mandelbrot.vcxproj", "{9843302D-7552-41DD-8A3A-0BCB6A0A3826}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -21,6 +23,14 @@ Global
 		{BC6813B0-BEC0-42A1-B5DF-8A34AAA0B0E9}.Release|x64.Build.0 = Release|x64
 		{BC6813B0-BEC0-42A1-B5DF-8A34AAA0B0E9}.Release|x86.ActiveCfg = Release|Win32
 		{BC6813B0-BEC0-42A1-B5DF-8A34AAA0B0E9}.Release|x86.Build.0 = Release|Win32
+		{9843302D-7552-41DD-8A3A-0BCB6A0A3826}.Debug|x64.ActiveCfg = Debug|x64
+		{9843302D-7552-41DD-8A3A-0BCB6A0A3826}.Debug|x64.Build.0 = Debug|x64
+		{9843302D-7552-41DD-8A3A-0BCB6A0A3826}.Debug|x86.ActiveCfg = Debug|Win32
+		{9843302D-7552-41DD-8A3A-0BCB6A0A3826}.Debug|x86.Build.0 = Debug|Win32
+		{9843302D-7552-41DD-8A3A-0BCB6A0A3826}.Release|x64.ActiveCfg = Release|x64
+		{9843302D-7552-41DD-8A3A-0BCB6A0A3826}.Release|x64.Build.0 = Release|x64
+		{9843302D-7552-41DD-8A3A-0BCB6A0A3826}.Release|x86.ActiveCfg = Release|Win32
+		{9843302D-7552-41DD-8A3A-0BCB6A0A3826}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
