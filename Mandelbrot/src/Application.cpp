@@ -145,13 +145,13 @@ double scroll = 1;
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
-	if(yoffset > 0 || scroll > 1) scroll += yoffset;
+	scroll += yoffset;
 }
 
 
 int main(void)
 {
-	Window window = Window::Window("Mandelbrot",640,480,true);
+	Window window = Window::Window("Mandelbrot", 640, 480, true);
 	glfwSetScrollCallback(window.m_Window, scroll_callback);
 	std::cout << glGetString(GL_VERSION) << std::endl;
 	int nrAttributes;
@@ -220,12 +220,12 @@ int main(void)
 
 		Renderer renderer;
 
+		double previousScroll = scroll;
+		double previousFragDelta = u_FragDelta;
 
 		/* Loop until the user closes the window */
 		while (!glfwWindowShouldClose(window.m_Window))
 		{
-
-			
 
 			/* Render here */
 			renderer.Clear();
@@ -236,24 +236,32 @@ int main(void)
 			shader.SetUniform1f("u_FragDelta", u_FragDelta);
 			shader.SetUniform1f("u_Iterations", u_Iterations);
 
-			/*va.Bind();
-			vb.Bind();
-			ib.Bind();*/
-
 			renderer.Draw(va, ib, shader);
-			
 
 			window.Update();
 
-			u_FragDelta = (2.0f / 480.0f) * pow(0.9,scroll); 
-			std::cout << u_FragDelta << std::endl;
+			int wWidth;
+			int wHeight;
 
-			double screenDrag[2] = {0,0};
+			window.GetWindowSize(&wWidth, &wHeight);
+
+			double xpos, ypos;
+			glfwGetCursorPos(window.m_Window, &xpos, &ypos);
+
+			u_FragDelta = (2.0f / 480.0f) * pow(0.9, scroll);
+			std::cout << (xpos / wWidth) << std::endl;
+
+			//u_Offset[0] += previousFragDelta * xpos * (scroll - previousScroll);
+			//u_Offset[1] += previousFragDelta * ypos * (scroll - previousScroll);
+
+			previousScroll = scroll;
+			previousFragDelta = u_FragDelta;
+
+			double screenDrag[2] = { 0,0 };
 			window.GetMouseScreenDrag(screenDrag);
 			u_Offset[0] += screenDrag[0] * u_FragDelta;
 			u_Offset[1] += screenDrag[1] * u_FragDelta;
 
-			
 		}
 	}
 	glfwTerminate();

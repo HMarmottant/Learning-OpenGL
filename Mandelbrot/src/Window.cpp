@@ -93,6 +93,12 @@ void Window::GetMouseScreenDrag(double* returnArray)
 	presMousePos[1] = ypos;
 }
 
+void Window::GetWindowSize(int* width, int* height)
+{
+	*width = m_Width;
+	*height = m_Height;
+}
+
 Window::~Window()
 {
 	glfwTerminate();

@@ -18,7 +18,6 @@ private:
 
 public:
 
-
     GLFWwindow* m_Window;
 
     Window(const char* title, int width, int height, bool vsync);
@@ -27,5 +26,6 @@ public:
     void Update();
     bool Closed() { return glfwWindowShouldClose(m_Window); };
     void GetMouseScreenDrag(double *returnArray);
+    void GetWindowSize(int* width, int* height);
 
 };
