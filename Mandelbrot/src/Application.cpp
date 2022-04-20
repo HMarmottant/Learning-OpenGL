@@ -143,16 +143,25 @@ void APIENTRY GLDebugMessageCallback(GLenum source, GLenum type, GLuint id,
 
 double scroll = 1;
 
+int wWidth = 640;
+int wHeight = 480;
+
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
 	scroll += yoffset;
 }
 
+void window_size_callback(GLFWwindow* window, int nwidth, int nheight)
+{
+	wWidth = nwidth;
+	wHeight = nheight;
+}
 
 int main(void)
 {
 	Window window = Window::Window("Mandelbrot", 640, 480, true);
 	glfwSetScrollCallback(window.m_Window, scroll_callback);
+	glfwSetWindowSizeCallback(window.m_Window, window_size_callback);
 	std::cout << glGetString(GL_VERSION) << std::endl;
 	int nrAttributes;
 	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
@@ -220,8 +229,12 @@ int main(void)
 
 		Renderer renderer;
 
+		double xpos, ypos;
+		glfwGetCursorPos(window.m_Window, &xpos, &ypos);
+
 		double previousScroll = scroll;
 		double previousFragDelta = u_FragDelta;
+		int previouswHeight = wHeight;
 
 		/* Loop until the user closes the window */
 		while (!glfwWindowShouldClose(window.m_Window))
@@ -240,22 +253,28 @@ int main(void)
 
 			window.Update();
 
-			int wWidth;
-			int wHeight;
+			u_Offset[1] -= (wHeight - previouswHeight) * u_FragDelta;
 
-			window.GetWindowSize(&wWidth, &wHeight);
+			//std::cout << wHeight << std::endl;
 
-			double xpos, ypos;
 			glfwGetCursorPos(window.m_Window, &xpos, &ypos);
 
-			u_FragDelta = (2.0f / 480.0f) * pow(0.9, scroll);
-			std::cout << (xpos / wWidth) << std::endl;
+			ypos = wHeight - ypos;
 
-			//u_Offset[0] += previousFragDelta * xpos * (scroll - previousScroll);
-			//u_Offset[1] += previousFragDelta * ypos * (scroll - previousScroll);
+			u_FragDelta = (2.0f / 480.0f) * pow(0.9, scroll);
+
+			double pt_fixe_x = u_Offset[0] + xpos * previousFragDelta;
+			double pt_fixe_y = u_Offset[1] + ypos * previousFragDelta;
+
+			/*std::cout << pt_fixe_x << std::endl;
+			std::cout << pt_fixe_y << "\n" << std::endl;*/
+
+			u_Offset[0] = pt_fixe_x - xpos * u_FragDelta;
+			u_Offset[1] = pt_fixe_y - ypos * u_FragDelta;
 
 			previousScroll = scroll;
 			previousFragDelta = u_FragDelta;
+			previouswHeight = wHeight;
 
 			double screenDrag[2] = { 0,0 };
 			window.GetMouseScreenDrag(screenDrag);
