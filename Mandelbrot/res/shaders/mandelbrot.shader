@@ -19,6 +19,10 @@ float DivergenceTest();
 uniform vec2 u_Offset;
 uniform float u_FragDelta;
 uniform float u_Iterations;
+uniform uint ap_Offset0[64];
+uniform uint ap_Offset1[64];
+uniform uint ap_FragDelta[64];
+uniform uint u_ExentedFloatSize;
 
 void main()
 {

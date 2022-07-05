@@ -16,6 +16,8 @@
 #include "Shader.h"
 #include "Window.h"
 
+#include "ArbitraryPrecisionFloat.h"
+
 #pragma region glDebugMessageCallback
 // This is free and unencumbered software released into the public domain.
 // 
@@ -204,14 +206,29 @@ int main(void)
 
 		Shader shader("./res/shaders/mandelbrot.shader");
 		shader.Bind();
+		apfloat::apfloat ap_Offset[] = { apfloat::apfloat(std::string("100000000000000000000000000000010"),16),apfloat::apfloat(std::string("1000000000000000000000000000000011"),16) };
+		apfloat::apfloat ap_FragDelta(std::string("0000000000000000000000000000000000000000100010001000100010001000100010001000100010001"), 16);
 
-		float u_Offset[] = { -2.0f, -1.5f };
-		float u_FragDelta = 2.0f / 480.0f;
+		/*std::cout << std::endl;
+		std::cout << "offset 1 " << ap_Offset[0].tobasestring(apfloat::apfloat(std::string("000000000000000000000000000001010"), 1)) << std::endl;;
+		std::cout << "offset 2 " << ap_Offset[1].tobasestring(apfloat::apfloat(std::string("000000000000000000000000000001010"), 1)) << std::endl;;
+		std::cout << "fragDelta " << ap_FragDelta.tobasestring(apfloat::apfloat(std::string("000000000000000000000000000001010"), 1)) << std::endl;;*/
+
+		/*float u_Offset[] = { -2.0f, -1.5f };
+		float u_FragDelta = 2.0f / 480.0f;*/
 		float u_Iterations = 50.0f;
 
-		shader.SetUniform2f("u_Offset", u_Offset);
-		shader.SetUniform1f("u_FragDelta", u_FragDelta);
+		/*shader.SetUniform2f("u_Offset", u_Offset);
+		shader.SetUniform1f("u_FragDelta", u_FragDelta);*/
 		shader.SetUniform1f("u_Iterations", u_Iterations);
+
+		shader.SetUniform1ui("u_ExentedFloatSize", 16);
+
+		shader.SetUniformuiv("ap_FragDelta", 16, ap_FragDelta.getasuintarray().array);
+
+		shader.SetUniformuiv("ap_Offset0", 16, ap_Offset[0].getasuintarray().array);
+		shader.SetUniformuiv("ap_Offset1", 16, ap_Offset[1].getasuintarray().array);
+
 
 		va.Unbind();
 		vb.Unbind();
@@ -221,7 +238,7 @@ int main(void)
 		Renderer renderer;
 
 		double previousScroll = scroll;
-		double previousFragDelta = u_FragDelta;
+		apfloat::apfloat previousFragDelta = ap_FragDelta;
 
 		/* Loop until the user closes the window */
 		while (!glfwWindowShouldClose(window.m_Window))
@@ -232,8 +249,10 @@ int main(void)
 
 			shader.Bind();
 
-			shader.SetUniform2f("u_Offset", u_Offset);
-			shader.SetUniform1f("u_FragDelta", u_FragDelta);
+			shader.SetUniformuiv("ap_FragDelta", 16, ap_FragDelta.getasuintarray().array);
+
+			shader.SetUniformuiv("ap_Offset0", 16, ap_Offset[0].getasuintarray().array);
+			shader.SetUniformuiv("ap_Offset1", 16, ap_Offset[1].getasuintarray().array);
 			shader.SetUniform1f("u_Iterations", u_Iterations);
 
 			renderer.Draw(va, ib, shader);
@@ -248,19 +267,19 @@ int main(void)
 			double xpos, ypos;
 			glfwGetCursorPos(window.m_Window, &xpos, &ypos);
 
-			u_FragDelta = (2.0f / 480.0f) * pow(0.9, scroll);
-			std::cout << (xpos / wWidth) << std::endl;
+			/*u_FragDelta = (2.0f / 480.0f) * pow(0.9, scroll);*/
+			//std::cout << (xpos / wWidth) << std::endl;
 
 			//u_Offset[0] += previousFragDelta * xpos * (scroll - previousScroll);
 			//u_Offset[1] += previousFragDelta * ypos * (scroll - previousScroll);
 
-			previousScroll = scroll;
-			previousFragDelta = u_FragDelta;
+			//previousScroll = scroll;
+			//previousFragDelta = u_FragDelta;
 
-			double screenDrag[2] = { 0,0 };
-			window.GetMouseScreenDrag(screenDrag);
-			u_Offset[0] += screenDrag[0] * u_FragDelta;
-			u_Offset[1] += screenDrag[1] * u_FragDelta;
+			//double screenDrag[2] = { 0,0 };
+			//window.GetMouseScreenDrag(screenDrag);
+			//u_Offset[0] += screenDrag[0] * u_FragDelta;
+			//u_Offset[1] += screenDrag[1] * u_FragDelta;
 
 		}
 	}

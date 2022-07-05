@@ -14,6 +14,10 @@
 #include "IndexBuffer.h"
 #include "VertexArray.h"
 #include "Shader.h"
+#include "Texture.h"
+
+#include "glm/glm.hpp"
+#include "glm/gtc/matrix_transform.hpp"
 
 #pragma region glDebugMessageCallback
 // This is free and unencumbered software released into the public domain.
@@ -136,7 +140,7 @@ void APIENTRY GLDebugMessageCallback(GLenum source, GLenum type, GLuint id,
 	}
 
 	std::cout << id << " : " << _type << " of " << _severity << " severity, raised from " << _source << " : " << msg << std::endl;
-	if (_severity == "HIGH") __debugbreak();
+	//if (_severity == "HIGH") __debugbreak();
 }
 #pragma endregion
 
@@ -151,7 +155,7 @@ int main(void)
 		return -1;
 
 	/* Create a windowed mode window and its OpenGL context */
-	window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
+	window = glfwCreateWindow(960, 540, "Hello World", NULL, NULL);
 	if (!window)
 	{
 		glfwTerminate();
@@ -168,7 +172,7 @@ int main(void)
 	std::cout << glGetString(GL_VERSION) << std::endl;
 	int nrAttributes;
 	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
-	std::cout << "Maximum nr of vertex attributes supported: " << nrAttributes << std::endl;
+	std::cout << "Maximum nb of vertex attributes supported: " << nrAttributes << std::endl;
 
 	{
 #pragma region INIT DEBUG OUTPUT
@@ -191,12 +195,11 @@ int main(void)
 		glDebugMessageCallback(GLDebugMessageCallback, NULL);
 #pragma endregion
 
-
 		float positions[] = {
-			-1.0f, -1.0f,
-			 1.0f, -1.0f,
-			 1.0f,  1.0f,
-			-1.0f,  1.0f
+			100.0f,  100.0f, 0.0f, 0.0f,
+			200.0f, 100.0f, 1.0f, 0.0f,
+			200.0f, 200.0f, 1.0f, 1.0f,
+			100.0f,  200.0f, 0.0f, 1.0f
 		};
 
 		unsigned int indices[] = {
@@ -204,21 +207,38 @@ int main(void)
 			2,3,0
 		};
 
+		
+		GLCall(glEnable(GL_BLEND));
+		GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+
 		VertexArray va;
 
-		VertexBuffer vb(positions, 4 * 2 * sizeof(float));
+		VertexBuffer vb(positions, 4 * 4 * sizeof(float));
 
 		VertexBufferLayout layout;
+		layout.Push<float>(2);
 		layout.Push<float>(2);
 		va.AddBuffer(vb, layout);
 
 		IndexBuffer ib(indices, 6);
 
+		glm::mat4 proj = glm::ortho(0.0f,960.0f,0.0f,540.0f,-1.0f,1.0f);
+
+		glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(100, 0, 0));
+
+		glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(200, 200, 0));
+
+		glm::mat4 mvp = proj * view * model;
+
 		Shader shader("./res/shaders/basic.shader");
 		shader.Bind();
 
 		clock_t timer = clock();
-		shader.SetUniform4f("u_Color", timer / CLOCKS_PER_SEC, 1 - (timer / CLOCKS_PER_SEC), 0, 1);
+
+		Texture texture("./res/texture/test.jpg");
+		texture.Bind();
+		shader.SetUniform1i("u_Texture", 0);
+		shader.SetUniformMat4f("u_MVP", mvp);
 
 		va.Unbind();
 		vb.Unbind();
@@ -236,8 +256,7 @@ int main(void)
 			shader.Bind();
 
 			timer = clock();
-			shader.SetUniform4f("u_Color", (double)(timer % CLOCKS_PER_SEC) / (double)CLOCKS_PER_SEC, 1.0 - ((double)(timer % CLOCKS_PER_SEC) / (double)CLOCKS_PER_SEC), 0.0, 1.0);
-
+			
 			/*va.Bind();
 			vb.Bind();
 			ib.Bind();*/
