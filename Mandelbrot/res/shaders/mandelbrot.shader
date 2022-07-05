@@ -27,7 +27,7 @@ uniform uint u_ExentedFloatSize;
 void main()
 {
 	float iter = DivergenceTest();
-	color = vec4(1-(iter/u_Iterations),0,0,1);
+	color = vec4(1-(iter/u_Iterations), (iter / u_Iterations), 1 - (iter / u_Iterations)* (iter / u_Iterations),1);
 }
 
 float DivergenceTest()
