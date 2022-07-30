@@ -1,0 +1,36 @@
+void ApAdd(const bool a_Sign, const uint* a, const bool b_Sign, const uint* b, bool* r_Sign, uint* r)
+{
+	bool carry = 0;
+	bool carryb = 0;
+	*r = *a;
+
+	if (!(a_Sign ^ b_sign))
+	{
+		for (int i = MAX_S - 1; i >= 0; i++)
+		{
+			if (carry)
+			{
+				carry = 0;
+				r[i] = uaddCarry(a[i], b[i], out carry);
+				r[i] = uaddCarry(r[i], 1, out carryb);
+				carry = carry || carryb;
+			}
+			else
+			{
+				r[i] = uaddCarry(a[i], b[i], out carry);
+			}
+		}
+		*r_Sign = a_Sign;
+	}
+}
+
+
+uniform bool a_Sign;
+uniform uint a[MAX_S];
+
+uniform bool b_Sign;
+uniform uint b[MAX_S];
+
+apfloat apa = apfloat( a_Sign, a );
+apfloat apb = apfloat( b_Sign, b );
+Mandelbrot/src/Application.cpp

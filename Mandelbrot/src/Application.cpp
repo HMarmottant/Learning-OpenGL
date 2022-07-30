@@ -16,7 +16,7 @@
 #include "Shader.h"
 #include "Window.h"
 
-#include "ArbitraryPrecisionFloat.h"
+#include "vendor/ArbitraryPrecisionFloat/ArbitraryPrecisionFloat.h"
 
 #pragma region glDebugMessageCallback
 // This is free and unencumbered software released into the public domain.
@@ -145,16 +145,25 @@ void APIENTRY GLDebugMessageCallback(GLenum source, GLenum type, GLuint id,
 
 double scroll = 1;
 
+int wWidth = 640;
+int wHeight = 480;
+
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
 	scroll += yoffset;
 }
 
+void window_size_callback(GLFWwindow* window, int nwidth, int nheight)
+{
+	wWidth = nwidth;
+	wHeight = nheight;
+}
 
 int main(void)
 {
 	Window window = Window::Window("Mandelbrot", 640, 480, true);
 	glfwSetScrollCallback(window.m_Window, scroll_callback);
+	glfwSetWindowSizeCallback(window.m_Window, window_size_callback);
 	std::cout << glGetString(GL_VERSION) << std::endl;
 	int nrAttributes;
 	glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &nrAttributes);
@@ -204,31 +213,28 @@ int main(void)
 
 		IndexBuffer ib(indices, 6);
 
-		Shader shader("./res/shaders/mandelbrot.shader");
+		Shader shader("./res/shaders/basic.shader");
 		shader.Bind();
-		apfloat::apfloat ap_Offset[] = { apfloat::apfloat(std::string("100000000000000000000000000000010"),16),apfloat::apfloat(std::string("1000000000000000000000000000000011"),16) };
-		apfloat::apfloat ap_FragDelta(std::string("0000000000000000000000000000000000000000100010001000100010001000100010001000100010001"), 16);
 
-		/*std::cout << std::endl;
-		std::cout << "offset 1 " << ap_Offset[0].tobasestring(apfloat::apfloat(std::string("000000000000000000000000000001010"), 1)) << std::endl;;
-		std::cout << "offset 2 " << ap_Offset[1].tobasestring(apfloat::apfloat(std::string("000000000000000000000000000001010"), 1)) << std::endl;;
-		std::cout << "fragDelta " << ap_FragDelta.tobasestring(apfloat::apfloat(std::string("000000000000000000000000000001010"), 1)) << std::endl;;*/
-
-		/*float u_Offset[] = { -2.0f, -1.5f };
-		float u_FragDelta = 2.0f / 480.0f;*/
+		apfloat::apfloat u_Offsetx = apfloat::apfloat(std::to_string(-2.0f), 8, BASE10APF);
+		apfloat::apfloat u_Offsety = apfloat::apfloat(std::to_string(-1.5f),8,BASE10APF) ;
+		apfloat::apfloat u_FragDelta = apfloat::apfloat(std::to_string(2.0f / 480.0f),8,BASE10APF);
 		float u_Iterations = 50.0f;
 
-		/*shader.SetUniform2f("u_Offset", u_Offset);
-		shader.SetUniform1f("u_FragDelta", u_FragDelta);*/
+		extendedFloatArray offx = u_Offsetx.getasuintarray();
+		extendedFloatArray offy = u_Offsety.getasuintarray();
+		extendedFloatArray fragD = u_FragDelta.getasuintarray();
+
+		shader.SetUniform1ui("u_Offsetx.sign", offx.sign);
+		shader.SetUniform1uiv("u_Offsetx.num", offx.size,offx.array);
+
+		shader.SetUniform1ui("u_Offsety.sign", offy.sign);
+		shader.SetUniform1uiv("u_Offsety.num", offy.size, offy.array);
+
+		shader.SetUniform1ui("u_FragDelta.sign", fragD.sign);
+		shader.SetUniform1uiv("u_FragDelta.num", fragD.size, fragD.array);
+
 		shader.SetUniform1f("u_Iterations", u_Iterations);
-
-		shader.SetUniform1ui("u_ExentedFloatSize", 16);
-
-		shader.SetUniformuiv("ap_FragDelta", 16, ap_FragDelta.getasuintarray().array);
-
-		shader.SetUniformuiv("ap_Offset0", 16, ap_Offset[0].getasuintarray().array);
-		shader.SetUniformuiv("ap_Offset1", 16, ap_Offset[1].getasuintarray().array);
-
 
 		va.Unbind();
 		vb.Unbind();
@@ -237,8 +243,12 @@ int main(void)
 
 		Renderer renderer;
 
+		double xpos, ypos;
+		glfwGetCursorPos(window.m_Window, &xpos, &ypos);
+
 		double previousScroll = scroll;
-		apfloat::apfloat previousFragDelta = ap_FragDelta;
+		apfloat::apfloat previousFragDelta = u_FragDelta;
+		int previouswHeight = wHeight;
 
 		/* Loop until the user closes the window */
 		while (!glfwWindowShouldClose(window.m_Window))
@@ -249,37 +259,53 @@ int main(void)
 
 			shader.Bind();
 
-			shader.SetUniformuiv("ap_FragDelta", 16, ap_FragDelta.getasuintarray().array);
+			extendedFloatArray offx = u_Offsetx.getasuintarray();
+			extendedFloatArray offy = u_Offsety.getasuintarray();
+			extendedFloatArray fragD = u_FragDelta.getasuintarray();
 
-			shader.SetUniformuiv("ap_Offset0", 16, ap_Offset[0].getasuintarray().array);
-			shader.SetUniformuiv("ap_Offset1", 16, ap_Offset[1].getasuintarray().array);
-			shader.SetUniform1f("u_Iterations", u_Iterations);
+			shader.SetUniform1ui("u_Offsetx.sign", offx.sign);
+			shader.SetUniform1uiv("u_Offsetx.num", offx.size, offx.array);
+
+			shader.SetUniform1ui("u_Offsety.sign", offy.sign);
+			shader.SetUniform1uiv("u_Offsety.num", offy.size, offy.array);
+
+			shader.SetUniform1ui("u_FragDelta.sign", fragD.sign);
+			shader.SetUniform1uiv("u_FragDelta.num", fragD.size, fragD.array);
 
 			renderer.Draw(va, ib, shader);
 
 			window.Update();
 
-			int wWidth;
-			int wHeight;
+			u_Offsety = u_Offsety - (apfloat::apfloat(std::to_string(wHeight - previouswHeight),2,BASE10APF) * u_FragDelta);
 
-			window.GetWindowSize(&wWidth, &wHeight);
+			//std::cout << wHeight << std::endl;
 
-			double xpos, ypos;
 			glfwGetCursorPos(window.m_Window, &xpos, &ypos);
 
-			/*u_FragDelta = (2.0f / 480.0f) * pow(0.9, scroll);*/
-			//std::cout << (xpos / wWidth) << std::endl;
+			ypos = wHeight - ypos;
 
-			//u_Offset[0] += previousFragDelta * xpos * (scroll - previousScroll);
-			//u_Offset[1] += previousFragDelta * ypos * (scroll - previousScroll);
+			//u_FragDelta = (2.0f / 480.0f) * pow(0.9, scroll);
 
-			//previousScroll = scroll;
-			//previousFragDelta = u_FragDelta;
+			apfloat::apfloat apxpos = apfloat::apfloat(std::to_string(xpos), 2, BASE10APF);
+			apfloat::apfloat apypos = apfloat::apfloat(std::to_string(ypos), 2, BASE10APF);
 
-			//double screenDrag[2] = { 0,0 };
-			//window.GetMouseScreenDrag(screenDrag);
-			//u_Offset[0] += screenDrag[0] * u_FragDelta;
-			//u_Offset[1] += screenDrag[1] * u_FragDelta;
+			apfloat::apfloat pt_fixe_x = u_Offsetx + (apxpos * previousFragDelta);
+			apfloat::apfloat pt_fixe_y = u_Offsety + (apypos * previousFragDelta);
+
+			/*std::cout << pt_fixe_x << std::endl;
+			std::cout << pt_fixe_y << "\n" << std::endl;*/
+
+			u_Offsetx = pt_fixe_x - (apxpos * u_FragDelta);
+			u_Offsety = pt_fixe_y - (apypos * u_FragDelta);
+
+			previousScroll = scroll;
+			previousFragDelta = u_FragDelta;
+			previouswHeight = wHeight;
+
+			double screenDrag[2] = { 0,0 };
+			window.GetMouseScreenDrag(screenDrag);
+			u_Offsetx = u_Offsetx + (apfloat::apfloat(std::to_string(screenDrag[0]), 2, BASE10APF) * u_FragDelta);
+			u_Offsety = u_Offsetx + (apfloat::apfloat(std::to_string(screenDrag[1]), 2, BASE10APF) * u_FragDelta);
 
 		}
 	}

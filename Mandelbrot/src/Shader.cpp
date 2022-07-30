@@ -74,7 +74,7 @@ void Shader::SetUniform1ui(const std::string& name, unsigned int v0)
 	glUniform1ui(GetUniformLocation(name), v0);
 }
 
-void Shader::SetUniformuiv(const std::string& name, int size, unsigned int v0[])
+void Shader::SetUniform1uiv(const std::string& name, int size, unsigned int v0[])
 {
 	glUniform1uiv(GetUniformLocation(name), size, v0);
 }

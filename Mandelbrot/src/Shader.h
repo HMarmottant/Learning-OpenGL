@@ -28,7 +28,7 @@ public:
 	void SetUniform3ui(const std::string& name, unsigned int v0, unsigned int v1, unsigned int v2);
 	void SetUniform2ui(const std::string& name, unsigned int v0, unsigned int v1);
 	void SetUniform1ui(const std::string& name, unsigned int v0);
-	void SetUniformuiv(const std::string& name, int size, unsigned int v0[]);
+	void SetUniform1uiv(const std::string& name, int size, unsigned int v0[]);
 
 	
 private:

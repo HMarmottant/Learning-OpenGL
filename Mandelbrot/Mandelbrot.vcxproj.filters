@@ -36,7 +36,7 @@
     <ClCompile Include="src\Window.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
-    <ClCompile Include="src\ArbitraryPrecisionFloat.cpp">
+    <ClCompile Include="src\vendor\ArbitraryPrecisionFloat\ArbitraryPrecisionFloat.cpp">
       <Filter>Fichiers sources</Filter>
     </ClCompile>
   </ItemGroup>
@@ -62,12 +62,15 @@
     <ClInclude Include="src\Window.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
-    <ClInclude Include="src\ArbitraryPrecisionFloat.h">
+    <ClInclude Include="src\vendor\ArbitraryPrecisionFloat\ArbitraryPrecisionFloat.h">
       <Filter>Fichiers d%27en-tête</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\shaders\basic.shader" />
     <None Include="res\shaders\mandelbrot.shader" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="src\note.txt" />
   </ItemGroup>
 </Project>
